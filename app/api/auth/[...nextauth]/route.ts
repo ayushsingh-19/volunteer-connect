@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
   ],
 
   session: {
-    strategy: "jwt", // ✅ now correctly typed
+    strategy: "jwt",
   },
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       await connectDB();
 
       const existingUser = await User.findOne({ email: user.email });
@@ -38,7 +38,6 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
 
-    // MongoDB ID → JWT
     async jwt({ token }) {
       await connectDB();
 
@@ -52,13 +51,17 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    // JWT → Session
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
       }
       return session;
+    },
+
+    // ✅ ADD THIS — THIS IS THE FIX
+    async redirect({ baseUrl }) {
+      return baseUrl; // always "/"
     },
   },
 };

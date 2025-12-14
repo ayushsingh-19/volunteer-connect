@@ -10,15 +10,12 @@ interface Task {
   description: string;
   category: string;
   priority: "Low" | "Medium" | "High";
-  status: string;
+  status: "Open" | "Assigned" | "In Progress" | "Completed" | "Cancelled";
   deadline: string;
-  postedBy: {
-    _id: string;
-    name: string;
-  };
   assignedVolunteer?: {
     _id: string;
     name: string;
+    email: string;
   } | null;
 }
 
@@ -29,6 +26,13 @@ export default function MyTasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchTasks = async () => {
+    const res = await fetch("/api/tasks/mine");
+    const data = await res.json();
+    setTasks(data.tasks || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
@@ -36,14 +40,27 @@ export default function MyTasksPage() {
     }
 
     if (status === "authenticated") {
-      fetch("/api/tasks/mine")
-        .then(res => res.json())
-        .then(data => {
-          setTasks(data.tasks || []);
-        })
-        .finally(() => setLoading(false));
+      fetchTasks();
     }
   }, [status, router]);
+
+  const markCompleted = async (id: string) => {
+    const ok = confirm("Mark this task as completed?");
+    if (!ok) return;
+
+    await fetch(`/api/tasks/${id}`, { method: "PATCH" });
+    fetchTasks();
+  };
+
+  const deleteTask = async (id: string) => {
+    const ok = confirm(
+      "Are you sure? This will permanently delete the task."
+    );
+    if (!ok) return;
+
+    await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    fetchTasks();
+  };
 
   if (loading) {
     return <p className="p-6">Loading your tasks...</p>;
@@ -101,9 +118,16 @@ export default function MyTasksPage() {
 
               {/* Assigned Volunteer */}
               {task.assignedVolunteer && (
-                <p className="text-sm text-green-700 font-medium">
-                  Assigned to: {task.assignedVolunteer.name}
-                </p>
+                <div className="text-sm text-green-700">
+                  <p>
+                    <b>Assigned to:</b>{" "}
+                    {task.assignedVolunteer.name}
+                  </p>
+                  <p>
+                    <b>Email:</b>{" "}
+                    {task.assignedVolunteer.email}
+                  </p>
+                </div>
               )}
 
               {/* Deadline */}
@@ -111,6 +135,29 @@ export default function MyTasksPage() {
                 Deadline:{" "}
                 {new Date(task.deadline).toLocaleDateString()}
               </p>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex gap-2 pt-2">
+                {/* ✅ Show ONLY when Assigned */}
+                {task.status === "Assigned" && (
+                  <button
+                    onClick={() => markCompleted(task._id)}
+                    className="flex-1 bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700"
+                  >
+                    Mark Completed
+                  </button>
+                )}
+
+                {/* ❌ Hide delete when Completed */}
+                {task.status !== "Completed" && (
+                  <button
+                    onClick={() => deleteTask(task._id)}
+                    className="flex-1 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

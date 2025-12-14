@@ -13,7 +13,7 @@ export default function Navbar() {
     <nav className="w-full bg-white border-b shadow-sm px-6 py-3 flex items-center justify-between">
       {/* LEFT: Logo */}
       <Link href="/" className="text-xl font-bold text-indigo-600">
-        VolunteerHub
+        Volunteer Connect
       </Link>
 
       {/* CENTER: Main Links */}

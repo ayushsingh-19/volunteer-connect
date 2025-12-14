@@ -103,7 +103,7 @@ export default function ProfilePage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}
           <div>
-            <label className="block font-medium mb-1">Name</label>
+            <label className="block font-medium mb-1">Full Name</label>
             <input
               type="text"
               name="name"

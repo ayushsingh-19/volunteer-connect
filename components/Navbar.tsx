@@ -9,62 +9,94 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  const isLoggedIn = !!session;
+
   return (
-    <nav className="w-full bg-white border-b shadow-sm px-6 py-3 flex items-center justify-between">
+    <nav
+      className="
+        w-full sticky top-0 z-50
+        bg-white/80 backdrop-blur-xl
+        border-b border-gray-200
+        shadow-sm
+        px-6 py-3
+        flex items-center justify-between
+      "
+    >
       {/* LEFT: Logo */}
-      <Link href="/" className="text-xl font-bold text-indigo-600">
+      <Link
+        href="/"
+        className="
+          text-2xl font-extrabold
+          text-indigo-600
+          tracking-tight
+          hover:scale-105
+          transition-transform
+        "
+      >
         Volunteer Connect
       </Link>
 
-      {/* CENTER: Main Links */}
-      <div className="hidden md:flex gap-6 font-medium">
-        <Link href="/" className="hover:text-indigo-600">
-          Home
-        </Link>
+      {/* CENTER: Links (ONLY WHEN LOGGED IN) */}
+      {isLoggedIn && (
+        <div className="hidden md:flex gap-6 font-medium text-gray-700">
+          {[
+            { href: "/", label: "Home" },
+            { href: "/tasks", label: "Browse Tasks" },
+            { href: "/tasks/add", label: "Post a Task" },
+            { href: "/mine", label: "My Tasks" },
+            { href: "/invites/incoming", label: "Incoming Requests" },
+            { href: "/volunteering", label: "My Volunteering" },
+            { href: "/dashboard", label: "Progress" },
+          ].map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="
+                relative
+                hover:text-indigo-600
+                transition-colors
+                after:absolute
+                after:left-0
+                after:-bottom-1
+                after:h-[2px]
+                after:w-0
+                after:bg-indigo-600
+                after:transition-all
+                hover:after:w-full
+              "
+            >
+              {link.label}
+            </Link>
+          ))}
 
-        <Link href="/tasks" className="hover:text-indigo-600">
-          Browse Tasks
-        </Link>
-
-        <Link href="/tasks/add" className="hover:text-indigo-600">
-          Post a Task
-        </Link>
-
-        <Link href="/my-tasks" className="hover:text-indigo-600">
-          My Tasks
-        </Link>
-
-        <Link href="/invites/incoming" className="hover:text-indigo-600">
-          Incoming Requests
-        </Link>
-
-        <Link href="/volunteering" className="hover:text-indigo-600">
-          My Volunteering
-        </Link>
-
-        {/* <Link href="/notifications" className="hover:text-indigo-600">
-          Notifications
-        </Link> */}
-        <Link href="/dashboard" className="hover:text-indigo-600">Progress</Link>
-
-
-        {/* Optional: Admin only */}
-        {session?.user?.role === "Admin" && (
-          <Link href="/admin" className="hover:text-indigo-600">
-            Admin
-          </Link>
-        )}
-      </div>
+          {session?.user?.role === "Admin" && (
+            <Link
+              href="/admin"
+              className="text-red-600 hover:text-red-700 font-semibold"
+            >
+              Admin
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* RIGHT: Auth Section */}
       {status === "loading" ? (
-        <p className="text-sm">Loading...</p>
-      ) : session ? (
+        <p className="text-sm text-gray-500 animate-pulse">
+          Loading...
+        </p>
+      ) : isLoggedIn ? (
         <div className="flex items-center gap-4">
           {/* Profile */}
           <button
             onClick={() => router.push("/profile")}
-            className="flex items-center gap-2 hover:bg-gray-100 px-3 py-1 rounded-lg"
+            className="
+              flex items-center gap-2
+              px-3 py-1.5
+              rounded-xl
+              hover:bg-gray-100
+              transition
+            "
           >
             {session.user?.image ? (
               <Image
@@ -72,15 +104,15 @@ export default function Navbar() {
                 alt="profile"
                 width={36}
                 height={36}
-                className="rounded-full"
+                className="rounded-full border border-gray-200"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-indigo-500 text-white flex items-center justify-center">
+              <div className="w-9 h-9 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
                 {session.user?.name?.[0]}
               </div>
             )}
 
-            <span className="hidden md:block font-medium">
+            <span className="hidden md:block font-medium text-gray-700">
               {session.user?.name}
             </span>
           </button>
@@ -88,19 +120,21 @@ export default function Navbar() {
           {/* Logout */}
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            className="
+              px-4 py-2
+              bg-red-500
+              text-white
+              rounded-xl
+              hover:bg-red-600
+              hover:shadow-md
+              active:scale-95
+              transition
+            "
           >
             Logout
           </button>
         </div>
-      ) : (
-        <Link
-          href="/login"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-        >
-          Login
-        </Link>
-      )}
+      ) : null}
     </nav>
   );
 }

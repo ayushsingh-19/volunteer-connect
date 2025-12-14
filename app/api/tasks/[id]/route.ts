@@ -41,7 +41,7 @@ export async function PATCH(
       );
     }
 
-    // 🔐 Only owner can update
+    // 🔐 Only owner
     if (task.postedBy.toString() !== session.user.id) {
       return NextResponse.json(
         { message: "Forbidden" },
@@ -49,11 +49,30 @@ export async function PATCH(
       );
     }
 
-    task.status = "Completed";
+    // 🧠 SAFE BODY PARSE
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
+    }
+
+    const { action } = body;
+
+    // 🆕 NEW FEATURE
+    if (action === "unassign") {
+      task.assignedVolunteer = null;
+      task.status = "Open";
+    } 
+    // ✅ OLD BEHAVIOUR (DEFAULT)
+    else {
+      task.status = "Completed";
+    }
+
     await task.save();
 
     return NextResponse.json(
-      { message: "Task marked as completed" },
+      { message: "Task updated successfully" },
       { status: 200 }
     );
   } catch (error) {

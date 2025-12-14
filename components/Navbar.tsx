@@ -29,6 +29,9 @@ export default function Navbar() {
         <Link href="/tasks/add" className="hover:text-indigo-600">
           Find Help
         </Link>
+        <Link href="/my-tasks" className="hover:text-indigo-600">
+          My Tasks
+        </Link>
       </div>
 
       {/* RIGHT: Auth Section */}

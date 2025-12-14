@@ -121,3 +121,49 @@ export async function DELETE(
     );
   }
 }
+
+
+/**
+ * GET SINGLE TASK
+ * GET /api/tasks/[id]
+ */
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await connectDB();
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "Invalid task id" },
+        { status: 400 }
+      );
+    }
+
+    const task = await Task.findById(id).populate(
+      "postedBy",
+      "name email image"
+    );
+
+    if (!task) {
+      return NextResponse.json(
+        { message: "Task not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { task },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Fetch task error:", error);
+    return NextResponse.json(
+      { message: "Server error" },
+      { status: 500 }
+    );
+  }
+}
+

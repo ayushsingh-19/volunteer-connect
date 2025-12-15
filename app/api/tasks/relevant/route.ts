@@ -78,7 +78,7 @@ async function getSimilarityScore(
   description: string
 ): Promise<number> {
   try {
-    const res = await fetch("http://localhost:8000/similarity", {
+    const res = await fetch(`${process.env.MODEL_URL}/similarity`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
